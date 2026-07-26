@@ -63,6 +63,10 @@ app.post("/listings",validateListing,
     wrapAsync(async (req,res,next)=>{
     // let {title,description,img,price,location,country} = req.body;
     //other wayyyyy------
+    let listingData = req.body.listing;
+    if(!listingData.image.url){
+      delete listingData.image.url;   // <-- ADD THIS so Mongoose default kicks in
+    }
     const newListing = new Listing(req.body.listing);
     await newListing.save();
     res.redirect("/listings");
