@@ -1,15 +1,13 @@
 const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
-const Listing = require("./models/listing");
 const path = require("path");
 const ejsMate = require("ejs-mate");
 const methodOverride = require("method-override");
-const wrapAsync = require("./utils/wrapAsync.js");
 const ExpressError = require("./utils/ExpressError.js");
-const {listingSchema} = require("./schema.js");
-const Review = require("./models/review.js");
-const {reviewSchema} = require("./schema.js");
+
+const listings = require("./routes/listing.js");
+const reviews = require("./routes/review.js");
 
 const mongo_url = "mongodb://127.0.0.1:27017/wanderlust";
 main().then(()=>{
@@ -32,120 +30,9 @@ app.get("/",(req,res)=>{
     res.send("Hi!");
 })
 
-const validateListing = (req,res,next) => {
-   let {error} = listingSchema.validate(req.body);
-   if(error){
-     let errMsg = error.details.map((el) => el.message).join(",");
-     throw new ExpressError(400,errMsg);
-   }else{
-     next();
-   }
-}
+app.use("/listings",listings);
 
-const validateReview = (req,res,next) => {
-   let {error} = reviewSchema.validate(req.body);
-   if(error){
-     let errMsg = error.details.map((el) => el.message).join(",");
-     throw new ExpressError(400,errMsg);
-   }else{
-     next();
-   }
-}
-
-//index route
-app.get("/listings",wrapAsync(async (req,res)=>{
-   const allListings =  await Listing.find({});
-   res.render("./listings/index.ejs",{allListings});
-}))
-
-//new form
-app.get("/listings/new",(req,res)=>{
-    res.render("./listings/new.ejs");
-})
-
-//show route
-app.get("/listings/:id",wrapAsync(async (req,res)=>{
-    let {id} = req.params;
-    const listing = await Listing.findById(id).populate("reviews");
-    res.render("./listings/show.ejs",{listing});
-}))
-
-//create route
-app.post("/listings",validateListing,
-    wrapAsync(async (req,res,next)=>{
-    // let {title,description,img,price,location,country} = req.body;
-    //other wayyyyy------
-    let listingData = req.body.listing;
-    if(!listingData.image.url){
-      delete listingData.image.url;   // <-- ADD THIS so Mongoose default kicks in
-    }
-    const newListing = new Listing(req.body.listing);
-    await newListing.save();
-    res.redirect("/listings");
- })
-);
-//edit route
-app.get("/listings/:id/edit",wrapAsync(async (req,res)=>{
-    let {id} = req.params;
-    const listing = await Listing.findById(id);
-    res.render("./listings/edit.ejs",{listing});
-}));
-
-//update route
-app.put("/listings/:id",
-  validateListing,
-  wrapAsync(async (req,res)=>{
-  let {id} = req.params;
-  await Listing.findByIdAndUpdate(id,{...req.body.listing});
-  res.redirect(`/listings/${id}`);
-}));
-
-app.delete("/listings/:id",wrapAsync(async (req,res)=>{
-    let {id} = req.params;
-    let deletedListing = await Listing.findByIdAndDelete(id);
-    console.log(deletedListing);
-    res.redirect("/listings");
-}))
-
-//Reviews
-//Post route
-app.post("/listings/:id/reviews",validateReview,wrapAsync(async (req,res)=>{
-    let {id} = req.params;
-    let listing = await Listing.findById(id);
-    let newReview = new Review (req.body.review);
-
-    listing.reviews.push(newReview);
-    await newReview.save();
-    await listing.save();
-    
-    res.redirect(`/listings/${listing._id}`);
-}));
-
-//Reviews
-//Delete Route
-app.delete("/listings/:id/reviews/:reviewId",wrapAsync(async (req,res)=>{
-  let {id,reviewId} = req.params;
-  await Listing.findByIdAndUpdate(id, {$pull: {reviews:reviewId}});
-  await Review.findByIdAndDelete(reviewId);
-  res.redirect(`/listings/${id}`);
-}));
-
-
-
-
-// app.get("/testlisting",async (req,res)=>{
-//    let sample = new Listing({
-//     title:"My New Villa",
-//     description:"By the beach",
-//     price: 1200,
-//     location: "Manora, Karachi",
-//     country: "Pakistan" 
-//    });
-
-//    await sample.save();
-//    console.log("Sample was saved");
-//    res.send("Success");
-// })
+app.use("/listings/:id/reviews",reviews);
 
 app.all("*splat",(req,res,next)=>{
     next(new ExpressError(404,"Page Not Found!"));
