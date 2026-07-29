@@ -6,13 +6,12 @@
   <div class="card col-6 offset-3 show-card listing-card" >
     <img src="<%=listing.image.url%>" class="card-img-top show-img" alt="listing_image">
     <div class="card-body">
-     <p class="card-text">
-       <br>
-       <%=listing.description%> <br>
-       &#36; <%=listing.price.toLocaleString("en-US")%> <br>
-       <%=listing.location%> <br>
-       <%=listing.country%>
-     </p>
+      <p class="card-text">Owned By:
+       <i><%= listing.owner.username %></i></p>
+       <p class="card-text"><%=listing.description%></p>
+       <p class="card-text">&#36; <%=listing.price.toLocaleString("en-US")%></p>
+       <p class="card-text"><%=listing.location%></p>
+       <p class="card-text"><%=listing.country%></p>
     </div>
   </div>
     <br>
@@ -44,7 +43,7 @@
      <% for(review of listing.reviews){ %>
        <div class="card col-5 ms-3 mb-3">
          <div class="card-body">
-          <h5 class="card-title">Rawaha Rashid</h5>
+          <h5 class="card-title mt-1">Rawaha Rashid</h5>
           <p class="card-text"><%=review.comment%></p>
           <p class="card-text"><%=review.rating%> stars</p>
          </div>
