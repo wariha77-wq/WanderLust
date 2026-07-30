@@ -63,15 +63,6 @@ app.use((req,res,next)=>{
     next();
 })
 
-// app.get("/demouser", async(req,res)=>{
-//   let fakeUser = new User({
-//     email:"fake12@gur.com",
-//     username:"fake-user"
-//   });
-
-//   let registeredUser = await User.register(fakeUser,"hellouser"); //convenience method to store a new user
-//   res.send(registeredUser);
-// })
 
 app.use("/listings",listingRouter);           // Flash() should be used before these routes 
 app.use("/listings/:id/reviews",reviewRouter);
