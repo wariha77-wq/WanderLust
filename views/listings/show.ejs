@@ -50,9 +50,12 @@
           <p class="card-text"><%=review.comment%></p>
           <p class="card-text"><%=review.rating%> stars</p>
          </div>
-         <form action="/listings/<%=listing._id%>/reviews/<%=review._id%>?_method=DELETE" class="mb-3 mt-3" method="post">
-          <button class="btn btn-sm btn-dark">Delete</button>
-         </form>
+         <% if(currUser){ %>
+           <form action="/listings/<%=listing._id%>/reviews/<%=review._id%>?_method=DELETE" class="mb-3 mt-3" method="post">
+            <button class="btn btn-sm btn-dark">Delete</button>
+           </form>
+         <% } %>
+         
        </div>
      <% } %>
     </div>
