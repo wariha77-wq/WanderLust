@@ -1,3 +1,8 @@
+if(process.env.NODE_ENV != "production"){ //as for when we enter production level
+ require("dotenv").config();
+}
+// console.log(process.env.SECRET); //.env variables ko access krrhe
+
 const express = require("express");
 const app = express();
 const mongoose = require("mongoose");

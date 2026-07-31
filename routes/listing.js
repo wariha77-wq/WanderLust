@@ -6,6 +6,11 @@ const ExpressError = require("../utils/ExpressError.js");
 const Listing = require("../models/listing");
 const {isLoggedIn,isOwner} = require("../middleware.js");
 
+const multer = require("multer");
+const {storage} = require("../cloudConfig.js");
+// const upload = multer({dest:'uploads/'}); //this could be a folder where the images will be saved 
+const upload = multer({storage});  //uploading on cloudinary
+
 const listingController = require("../controller/listing.js");
 
 const validateListing = (req,res,next) => {
@@ -21,7 +26,8 @@ const validateListing = (req,res,next) => {
 router  // This is router.route
   .route("/")
   .get(wrapAsync(listingController.index)) //index route
-  .post(isLoggedIn,validateListing,wrapAsync(listingController.createListing)); //Create route
+  .post(isLoggedIn,validateListing,upload.single("image"),wrapAsync(listingController.createListing)); //Create route
+  
 
 
 router.get("/new",isLoggedIn,listingController.renderNewForm); //new route

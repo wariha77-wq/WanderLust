@@ -29,12 +29,13 @@ module.exports.showListing = async (req,res)=>{
 module.exports.createListing = async (req,res,next)=>{
     // let {title,description,img,price,location,country} = req.body;
     //other wayyyyy------
+    let url = req.file.path;
+    let filename = req.file.filename;
     let listingData = req.body.listing;
-    if(!listingData.image.url){
-      delete listingData.image.url;   // <-- ADD THIS so Mongoose default kicks in
-    }
     const newListing = new Listing(req.body.listing);
     newListing.owner = req.user._id;
+    newListing.image = {filename,url};
+    
     await newListing.save();
     req.flash("success","New listing Created!");
     res.redirect("/listings");
