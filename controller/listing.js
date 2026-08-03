@@ -53,7 +53,7 @@ module.exports.editListing = async (req,res)=>{
     const listing = await Listing.findById(id);
     if(!listing){
       req.flash("error","Requested listing does not exist!");
-      res.redirect("/listings");
+      return res.redirect("/listings");
     }else{
       let orgUrl = listing.image.url;
       orgUrl = orgUrl.replace("/upload","/upload/w_250");
@@ -64,14 +64,32 @@ module.exports.editListing = async (req,res)=>{
 module.exports.updateListing = async (req,res)=>{
   let {id} = req.params;
   let listing = await Listing.findByIdAndUpdate(id,{...req.body.listing});
-  
+   if(!listing){
+    req.flash("error","Requested listing does not exist!");
+    return res.redirect("/listings");
+  }
+
+  listing.set(req.body.listing);
+
+  // update geometry after location change
+  const geoData = await geocodingClient
+    .forwardGeocode({
+      query: req.body.listing.location,
+      limit: 1
+    })
+    .send();
+
+  listing.geometry = geoData.body.features[0].geometry;
+
   if(typeof req.file !== "undefined"){ //check if req mai file exist krti hy?
     let url = req.file.path;
     let filename = req.file.filename;
     listing.image = {filename,url};
-    await listing.save();
+   
   }
-  
+   
+  await listing.save();
+
   req.flash("success","Listing Updated!");
   res.redirect(`/listings/${id}`);
 };
